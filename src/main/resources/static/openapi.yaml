@@ -855,7 +855,7 @@ components:
           description: 알림 대상 사용자 고유 ID
         type:
           type: string
-          description: 알림 유형 (예: CONSUMABLE_REPLACED, LOW_SCORE, VEHICLE_DUE_SOON)
+          description: 알림 유형 예 CONSUMABLE_REPLACED, LOW_SCORE, VEHICLE_DUE_SOON
         title:
           type: string
           description: 알림 제목
