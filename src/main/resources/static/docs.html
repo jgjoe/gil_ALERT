@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8" />
+    <title>GildongE API Docs</title>
+    <!-- CDN을 이용한 Swagger UI 로드 -->
+    <link
+            rel="stylesheet"
+            href="https://unpkg.com/swagger-ui-dist/swagger-ui.css"
+    />
+    <script src="https://unpkg.com/swagger-ui-dist/swagger-ui-bundle.js"></script>
+    <script src="https://unpkg.com/swagger-ui-dist/swagger-ui-standalone-preset.js"></script>
+</head>
+<body>
+<div id="swagger-ui"></div>
+<script>
+    window.onload = () => {
+        SwaggerUIBundle({
+            dom_id: '#swagger-ui',
+            // OpenAPI 스펙 파일 경로
+            url: '/openapi.yaml',
+            deepLinking: true,
+            presets: [
+                SwaggerUIBundle.presets.apis,
+                SwaggerUIStandalonePreset
+            ],
+        });
+    };
+</script>
+</body>
+</html>
