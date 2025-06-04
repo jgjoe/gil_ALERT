@@ -70,7 +70,7 @@ public class ConsumableInspectionScheduler {
                 alert.setId(UUID.randomUUID().toString());
                 alert.setUserId(userId);
                 alert.setType("CONSUMABLE_DUE_SOON");
-                alert.setTitle("소모품 교체 예정 알림");
+                alert.setTitle("차량점검");
                 alert.setMessage(
                         "가장 가까운 교체 예정일: " +
                                 // “20250525” → “05월 25일”

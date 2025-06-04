@@ -65,7 +65,7 @@ public class DrivingPatternChangeStreamListener {
                 alert.setId(UUID.randomUUID().toString());
                 alert.setUserId(fullDoc.getString("userId"));
                 alert.setType("DRIVING_SCORE_LOW");
-                alert.setTitle("안전 알림: 운전 점수 경고");
+                alert.setTitle("안전");
                 alert.setMessage(
                         "최근 운전 점수가 " + score + "점으로 낮게 나왔습니다. " +
                                 "부드러운 운전으로 점수를 올려볼까요?"
