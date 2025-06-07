@@ -93,7 +93,7 @@ public class ConsumableChangeStreamListener {
                         alert.setId(UUID.randomUUID().toString());
                         alert.setUserId(fullDoc.getString("userId"));
                         alert.setType("CONSUMABLE_REPLACED");
-                        alert.setTitle("차량소모품");
+                        alert.setTitle("차량 소모품");
                         alert.setMessage(
                                 "[" + fullDoc.getString("carModel") + " / " + fullDoc.getString("carNumber") + "]\n" +
                                         toKoreanFieldName(fieldName) + " 교체 완료: " + formatDateString(newDateStr)

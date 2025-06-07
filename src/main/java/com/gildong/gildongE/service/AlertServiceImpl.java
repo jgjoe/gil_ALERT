@@ -1,6 +1,7 @@
 package com.gildong.gildongE.service;
 
 import com.gildong.gildongE.dto.AlertDto;
+import com.gildong.gildongE.dto.NotificationRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -33,6 +34,11 @@ public class AlertServiceImpl implements AlertService {
      * userId별로 복수의 emitter가 생길 수 있으므로 List 로 관리합니다.
      */
     private final Map<String, CopyOnWriteArrayList<SseEmitter>> emitters = new ConcurrentHashMap<>();
+    private final NotificationService notificationService;
+
+    public AlertServiceImpl(NotificationService notificationService) {
+        this.notificationService = notificationService;
+    }
 
     /**
      * 클라이언트가 SSE 연결을 요청하면 호출됩니다.
@@ -125,6 +131,13 @@ public class AlertServiceImpl implements AlertService {
         // 서버 로그에도 남겨둔다.
         logger.info("[ALERT][PUSHED] userId={} type={} title={} message={}",
                 userId, alert.getType(), alert.getTitle(), alert.getMessage());
+
+        // DB 저장 호출
+        NotificationRequest req = new NotificationRequest();
+        req.setUserId(alert.getUserId());
+        req.setTitle(categoryFromType(alert.getType()));
+        req.setMessage(alert.getMessage());
+        notificationService.create(req);
     }
 
     /**
@@ -157,5 +170,15 @@ public class AlertServiceImpl implements AlertService {
                 emitters.remove(userId);
             }
         }
+    }
+
+    // 알림 type 기반으로 카테고리 문자열 반환
+    private String categoryFromType(String type) {
+        return switch (type) {
+            case "DRIVING_SCORE_LOW", "DRIVING_SCORE_WEEKLY_AVG" -> "안전";
+            case "CONSUMABLE_REPLACED" -> "차량 소모품";
+            case "CONSUMABLE_DUE_SOON" -> "차량 점검";
+            default -> "기타";
+        };
     }
 }
