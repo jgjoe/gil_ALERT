@@ -36,6 +36,8 @@ new EventSource("http://<서버주소>:8080/alerts/subscribe/USER123");
 | 발송 | 사용자 단위로 알림 push | `AlertServiceImpl.pushAlert` |
 | 저장 | 알림 이력을 MongoDB에 기록·조회 | `NotificationController` · `NotificationRepository` · `model/Notification` |
 | 테스트 경로 | 특정 사용자에게 테스트 알림을 쏘는 엔드포인트 | `AlertController` `POST /alerts/test/{userId}` |
+| **변경 감지** | MongoDB Change Stream을 구독해 소모품·주행패턴 문서가 바뀌면 즉시 알림 발생 | `ConsumableChangeStreamListener` · `DrivingPatternChangeStreamListener` |
+| **정기 점검** | 매일 자정(Asia/Seoul)에 교체 시기가 다가온 소모품을 찾아 `CONSUMABLE_DUE_SOON` 알림 발송 | `ConsumableInspectionScheduler` |
 
 ## 설계 판단
 
@@ -55,6 +57,13 @@ SSE 연결은 타임아웃·네트워크 오류·클라이언트 종료로 조�
 무한 대기로 두면 끊긴 연결을 서버가 알아차릴 수단이 없습니다. 6시간 타임아웃을 걸어
 주기적으로 재구독하게 했습니다.
 
+### 알림이 생기는 경로를 둘로 나눴다
+
+**연결만 열어 두면 보낼 것이 없습니다.** 알림이 언제 생기는지를 두 갈래로 만들었습니다.
+
+- **즉시 반응** — MongoDB **Change Stream**을 구독해 소모품·주행패턴 문서가 바뀌는 순간 알림을 만듭니다. 앱이 폴링하지 않아도 서버가 먼저 압니다.
+- **정기 점검** — 교체 시기처럼 "시간이 지나서" 생기는 사건은 변경 이벤트가 없습니다. 매일 자정에 도래 예정 소모품을 훑는 스케줄러를 따로 뒀습니다.
+
 ## 기술 스택
 
 | 영역 | 기술 |
@@ -65,8 +74,10 @@ SSE 연결은 타임아웃·네트워크 오류·클라이언트 종료로 조�
 
 ## 실행
 
+환경변수로 접속 정보를 넘깁니다.
+
 ```text
-MONGODB_URI=mongodb+srv://...
+MONGODB_URI=mongodb+srv://<user>:<password>@<cluster>/<db>
 ```
 
 ```bash
@@ -81,6 +92,9 @@ MONGODB_URI=mongodb+srv://...
 - 학기 프로젝트 프로토타입이라 인증이 붙어 있지 않습니다. 구독 경로가 `userId`를 그대로 받으므로, 운영이라면 토큰에서 사용자를 확인하는 절차가 선행되어야 합니다.
 - emitter를 서버 메모리에 보관합니다. 인스턴스가 여러 대면 구독한 인스턴스에서만 알림이 나가므로, 확장하려면 메시지 브로커가 필요합니다.
 - 알림 발송량·지연 등 운영 지표는 측정하지 않았습니다.
+
+즉시 반응(Change Stream)과 정기 점검(스케줄러)을 나눈 구조는 그대로 두고, 위 항목들은 운영으로 옮길 때
+먼저 손봐야 할 순서로 적어 둔 것입니다.
 
 ## 만든 사람
 
